@@ -89,6 +89,26 @@ employeesRouter.put('/:id', (req, res, next) => {
       });
     }
   }); //END of db.run
+});
+
+employeesRouter.delete('/:id', (req, res, next) => {
+  const id = req.params.id;
+  const sql = `UPDATE Employee
+    SET is_current_employee = 0
+    WHERE Employee.id = ${id} `;
+  db.run(sql, (err) => {
+    if (err){
+      res.status(500).send();
+    } else {
+      db.get(`SELECT * FROM Employee WHERE Employee.id = ${id}`, (err, employee) => {
+        if (err){
+          res.status(500).send();
+        } else {
+          res.status(200).send({employee: employee});
+        }
+      })
+    }
+  })
 })
 
 
