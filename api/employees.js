@@ -8,7 +8,7 @@ const db = require('./../migration.js');
 employeesRouter.param('id', (req, res, next, id) => {
   db.get(`SELECT * FROM Employee WHERE id = ${id}`, (error, employee) => {
     if (error) {
-      res.status(500).send();
+      next(error);
     } else if (employee) {
       req.employee = employee;
       next();

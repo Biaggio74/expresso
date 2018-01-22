@@ -3,6 +3,21 @@ const app = express();
 const db = require('./../migration.js');
 const timesheetRouter = express.Router({mergeParams: true});
 
+timesheetRouter.param('timesheetId', (req, res, next, id) => {
+  db.get(`SELECT * FROM Timesheet WHERE id = $id`, {
+    $id: id
+  }, (error, result) => {
+    if (error) {
+      next(error);
+    } else if (result) {
+      req.timesheet = result;
+      next();
+    } else {
+      res.status(404).send();
+    }
+  })
+});
+
 timesheetRouter.get('/', (req, res, next) => {
   const employeeId = req.params.id;
   db.all(`SELECT * FROM Timesheet WHERE Timesheet.employee_id = ${employeeId}`, (error, timesheets) => {
@@ -15,7 +30,7 @@ timesheetRouter.get('/', (req, res, next) => {
 });
 
 timesheetRouter.post('/', (req, res, next) => {
-  if (!req.body.timesheet.hours || !req.body.timesheet.rate || !req.body.timesheet.date || !req.params.id) {
+  if (!req.body.timesheet.hours || !req.body.timesheet.rate || !req.body.timesheet.date) {
     res.status(400).send();
   }
   const employeeId = req.params.id;
@@ -31,7 +46,7 @@ timesheetRouter.post('/', (req, res, next) => {
     if (error) {
       res.status(500).send();
     } else {
-      db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${this.lastID}`, (err,timesheet) => {
+      db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (err,timesheet) => {
         if (err) {
           res.status(500).send();
         } else {
@@ -52,17 +67,18 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
       hours = $hours,
       rate = $rate,
       date = $date
-    WHERE Timesheet.id = ${timesheetId} `;
+    WHERE id = $timesheetId `;
   const data = {
     $hours: req.body.timesheet.hours,
     $rate: req.body.timesheet.rate,
-    $date: req.body.timesheet.date
+    $date: req.body.timesheet.date,
+    $timesheetId: req.timesheet.id
   };
   db.run(sql, data, (error) => {
     if (error) {
-      res.status(500).send();
+      next(error);
     } else {
-      db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${timesheetId}`, (err, newSheet) => {
+      db.get(`SELECT * FROM Timesheet WHERE id = ${req.timesheet.id}`, (err, newSheet) => {
         if (err) {
           res.status(500).send();
         } else if (newSheet && newSheet.id){
@@ -74,6 +90,7 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
     }
   })
 });
+
 
 
 
