@@ -31,7 +31,7 @@ db.serialize(function() {
     )`
   );
 
-  db.run(`CREATE TABLE IF NOT EXISTS MenuItem (
+  db.run(`CREATE TABLE IF NOT EXISTS menuItem (
     id INTEGER NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
