@@ -75,18 +75,11 @@ menuRouter.put('/:id', (req, res, next) => {
   });
 });
 
-const goldMedalNumber = country => {
-    return `SELECT COUNT(*)
-    AS count
-    FROM GoldMedal
-    WHERE country = '${country}';`;
-};
-
 menuRouter.delete('/:id', (req, res, next) => {
   const id = req.menu.id;
   const sql = `DELETE FROM Menu WHERE id = ${id}`;
   const countingItems = () => {
-    db.get(`SELECT COUNT(*) FROM MenuItem WHERE menu_id = $id `, {$id: req.menu.id } ,(err,res) => {
+    db.get(`SELECT COUNT(*) FROM MenuItem WHERE menu_id = $id `, {$id: req.menu.id }, (err,res) => {
       if (err){
         return 500;
       } else {
