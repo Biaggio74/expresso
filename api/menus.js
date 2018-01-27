@@ -83,7 +83,7 @@ menuRouter.delete('/:id', (req, res, next) => {
   let itemCounts;
   const id = req.menu.id;
   const sql = `DELETE FROM Menu WHERE id = ${id}`;
-  db.get(`SELECT COUNT(*) AS count FROM MenuItem `, (err,response) => {
+  db.get(`SELECT COUNT(*) AS count FROM MenuItem WHERE menu_id = ${id} `, (err,response) => {
     if (err) {
       next(err);
     } else {
