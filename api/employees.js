@@ -69,7 +69,7 @@ employeesRouter.put('/:id', (req, res, next) => {
     name = $name,
     position = $position,
     wage = $wage
-  WHERE Employee.id = ${req.params.id}`;
+  WHERE id = ${req.params.id}`;
   const data = {
     $name: req.body.employee.name,
     $position: req.body.employee.position,
@@ -79,14 +79,10 @@ employeesRouter.put('/:id', (req, res, next) => {
     if (error){
       res.status(500).send();
     } else {
-      db.get(`SELECT * FROM Employee WHERE Employee.id = ${req.params.id}`,(err,row) => {
-        if (err){
-          res.status(500).send();
-        } else if (row){
-          res.status(200).send({employee: row});
-        } else {
-          res.status(404).send();
-        }
+      db.get(`SELECT * FROM Employee WHERE id = ${req.employee.id}`,(err,row) => {
+
+        res.status(200).send({employee: row});
+
       });
     }
   }); //END of db.run
@@ -101,7 +97,7 @@ employeesRouter.delete('/:id', (req, res, next) => {
     if (err){
       res.status(500).send();
     } else {
-      db.get(`SELECT * FROM Employee WHERE Employee.id = ${id}`, (err, employee) => {
+      db.get(`SELECT * FROM Employee WHERE id = ${req.employee.id}`, (err, employee) => {
         if (err){
           res.status(500).send();
         } else {

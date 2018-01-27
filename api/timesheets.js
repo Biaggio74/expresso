@@ -4,9 +4,7 @@ const db = require('./../migration.js');
 const timesheetRouter = express.Router({mergeParams: true});
 
 timesheetRouter.param('timesheetId', (req, res, next, id) => {
-  db.get(`SELECT * FROM Timesheet WHERE id = $id`, {
-    $id: id
-  }, (error, result) => {
+  db.get(`SELECT * FROM Timesheet WHERE id = ${id}`, (error, result) => {
     if (error) {
       next(error);
     } else if (result) {
@@ -61,7 +59,6 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
   if (!req.body.timesheet.hours || !req.body.timesheet.rate || !req.body.timesheet.date) {
     res.status(400).send();
   }
-  const timesheetId = req.params.timesheetId;
   const sql = `UPDATE Timesheet
     SET
       hours = $hours,
@@ -78,18 +75,24 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
     if (error) {
       next(error);
     } else {
-      db.get(`SELECT * FROM Timesheet WHERE id = ${req.timesheet.id}`, (err, newSheet) => {
-        if (err) {
-          res.status(500).send();
-        } else if (newSheet && newSheet.id){
-          res.status(200).send({timesheet: newSheet});
-        } else {
-          res.status(404).send();
-        }
+      db.get(`SELECT * FROM Timesheet WHERE id = ${req.timesheet.id}`, (err, timesheet) => {
+        res.status(200).send({timesheet: timesheet})
       })
     }
   })
 });
+
+timesheetRouter.delete('/:timesheetId', (req, res, next) => {
+  const id = req.timesheet.id;
+  const sql = `DELETE FROM Timesheet WHERE id = ${id}`;
+  db.run(sql, (error) => {
+    if (error) {
+      res.sendStatus(500);
+    } else {
+      res.status(204).send('Timesheet has been deleted!');
+    }
+  })
+})
 
 
 
