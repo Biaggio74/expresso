@@ -3,6 +3,10 @@ const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite'
 
 
 db.serialize(function() {
+  db.run(`DROP TABLE IF EXISTS Menu`);
+  db.run(`DROP TABLE IF EXISTS MenuItem`);
+  db.run(`DROP TABLE IF EXISTS Employee`);
+  db.run(`DROP TABLE IF EXISTS Timesheet`);
   db.run(`CREATE TABLE IF NOT EXISTS Employee (
     id INTEGER NOT NULL,
     name TEXT NOT NULL,
@@ -14,7 +18,7 @@ db.serialize(function() {
   );
 
   db.run(`CREATE TABLE IF NOT EXISTS Timesheet (
-    id INTEGER PRIMARY KEY,
+    id INTEGER NOT NULL,
     hours INTEGER NOT NULL,
     rate INTEGER NOT NULL,
     date INTEGER NOT NULL,
@@ -31,7 +35,7 @@ db.serialize(function() {
     )`
   );
 
-  db.run(`CREATE TABLE IF NOT EXISTS menuItem (
+  db.run(`CREATE TABLE IF NOT EXISTS MenuItem (
     id INTEGER NOT NULL,
     name TEXT NOT NULL,
     description TEXT,

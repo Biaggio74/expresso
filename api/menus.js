@@ -4,7 +4,7 @@ const db = require('./../migration.js');
 const menuRouter = express.Router({mergeParams: true});
 const menuitemsRouter = require('./menuitems.js')
 
-menuRouter.param('menuId', (req, res, next, id) => {
+menuRouter.param('id', (req, res, next, id) => {
   db.get(`SELECT * FROM Menu WHERE id = ${id}`, (error, menu) => {
     if (error) {
       res.sendStatus(500);
@@ -27,7 +27,7 @@ menuRouter.get('/', (req, res, next) => {
   });
 });
 
-menuRouter.get('/:menuId', (req, res, next) => {
+menuRouter.get('/:id', (req, res, next) => {
   res.status(200).send({menu: req.menu})
 })
 
@@ -52,7 +52,7 @@ menuRouter.post('/', (req, res, next) => {
   });
 });
 
-menuRouter.put('/:menuId', (req, res, next) => {
+menuRouter.put('/:id', (req, res, next) => {
   if (!req.body.menu.title || !req.menu.id){
     res.sendStatus(400)
   }
@@ -76,35 +76,34 @@ menuRouter.put('/:menuId', (req, res, next) => {
   });
 });
 
-const countingMiddlWare = (req, res, next) => {
+menuRouter.delete('/:id', (req, res, next) => {
+  if (!req.menu.id){
+    res.sendStatus(400)
+  }
   let itemCounts;
-  db.get(`SELECT COUNT(*) FROM menuItem WHERE menu_id = $id `, {$id: req.params.id }, (err,res) => {
+  const id = req.menu.id;
+  const sql = `DELETE FROM Menu WHERE id = ${id}`;
+  db.get(`SELECT COUNT(*) AS count FROM MenuItem `, (err,response) => {
     if (err) {
       next(err);
     } else {
-      itemCounts = res['COUNT(*)'];
-      req.body.count = itemCounts;
-      next();
+      itemCounts = response.count;
+      console.log(response);
+      if (itemCounts === 0) {
+        db.run(sql, (error, menu) => {
+          if (error) {
+            res.sendStatus(500)
+          } else {
+            res.status(204).send();
+          }
+        })
+      } else {
+        res.sendStatus(400);
+      }
     }
   })
-};
-
-menuRouter.delete('/:menuId', countingMiddlWare, (req, res, next) => {
-  const id = req.menu.id;
-  const sql = `DELETE FROM Menu WHERE id = ${id}`;
-  if (req.body.count === 0) {
-    db.run(sql, (error) => {
-      if (error) {
-        res.sendStatus(500)
-      } else {
-        res.status(204).send();
-      }
-    })
-  } else {
-    res.sendStatus(400);
-  }
 })
 
-menuRouter.use('/:menuId/menu-items', menuitemsRouter)
+menuRouter.use('/:id/menu-items', menuitemsRouter)
 
 module.exports = menuRouter;
