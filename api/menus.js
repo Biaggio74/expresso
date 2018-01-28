@@ -4,7 +4,7 @@ const db = require('./../migration.js');
 const menuRouter = express.Router({mergeParams: true});
 const menuitemsRouter = require('./menuitems.js')
 
-menuRouter.param('id', (req, res, next, id) => {
+menuRouter.param(':menuId', (req, res, next, id) => {
   db.get(`SELECT * FROM Menu WHERE id = ${id}`, (error, menu) => {
     if (error) {
       res.sendStatus(500);
@@ -27,7 +27,7 @@ menuRouter.get('/', (req, res, next) => {
   });
 });
 
-menuRouter.get('/:id', (req, res, next) => {
+menuRouter.get('/:menuId', (req, res, next) => {
   res.status(200).send({menu: req.menu})
 })
 
@@ -52,7 +52,7 @@ menuRouter.post('/', (req, res, next) => {
   });
 });
 
-menuRouter.put('/:id', (req, res, next) => {
+menuRouter.put('/:menuId', (req, res, next) => {
   if (!req.body.menu.title || !req.menu.id){
     res.sendStatus(400)
   }
@@ -76,25 +76,20 @@ menuRouter.put('/:id', (req, res, next) => {
   });
 });
 
-menuRouter.delete('/:id', (req, res, next) => {
+menuRouter.delete('/:menuId', (req, res, next) => {
   const id = req.menu.id;
   const sql = `DELETE FROM Menu WHERE id = ${id}`;
   db.get(`SELECT COUNT(*) AS count FROM MenuItem WHERE menu_id = ${id} `, (err,response) => {
-    console.log(response.count)
-    if (response.count > 0){
-      res.sendStatus(400);
-    } else {
+    if (response.count === 0){
       db.run(sql, (err) => {
-        if (err){
-          res.sendStatus(500);
-        } else {
-          res.sendStatus(204);
-        }
+        res.sendStatus(204)
       })
+    } else {
+      res.sendStatus(400)
     }
   });
 });
 
-menuRouter.use('/:id/menu-items', menuitemsRouter)
+menuRouter.use('/:menuId/menu-items', menuitemsRouter)
 
 module.exports = menuRouter;
