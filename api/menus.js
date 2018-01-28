@@ -81,12 +81,16 @@ menuRouter.delete('/:id', (req, res, next) => {
   const sql = `DELETE FROM Menu WHERE id = ${id}`;
   db.get(`SELECT COUNT(*) AS count FROM MenuItem WHERE menu_id = ${id} `, (err,response) => {
     console.log(response.count)
-    if (response.count === 0){
-      db.run(sql, (err) => {
-        res.sendStatus(204)
-      })
+    if (response.count > 0){
+      res.sendStatus(400);
     } else {
-      res.sendStatus(400)
+      db.run(sql, (err) => {
+        if (err){
+          res.sendStatus(500);
+        } else {
+          res.sendStatus(204);
+        }
+      })
     }
   });
 });
