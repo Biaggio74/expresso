@@ -77,32 +77,19 @@ menuRouter.put('/:id', (req, res, next) => {
 });
 
 menuRouter.delete('/:id', (req, res, next) => {
-  if (!req.menu.id){
-    res.sendStatus(400)
-  }
-  let itemCounts;
   const id = req.menu.id;
   const sql = `DELETE FROM Menu WHERE id = ${id}`;
   db.get(`SELECT COUNT(*) AS count FROM MenuItem WHERE menu_id = ${id} `, (err,response) => {
-    if (err) {
-      next(err);
+    console.log(response.count)
+    if (response.count === 0){
+      db.run(sql, (err) => {
+        res.sendStatus(204)
+      })
     } else {
-      itemCounts = response.count;
-      console.log(response);
-      if (itemCounts === 0) {
-        db.run(sql, (error, menu) => {
-          if (error) {
-            res.sendStatus(500)
-          } else {
-            res.status(204).send();
-          }
-        })
-      } else {
-        res.sendStatus(400);
-      }
+      res.sendStatus(400)
     }
-  })
-})
+  });
+});
 
 menuRouter.use('/:id/menu-items', menuitemsRouter)
 
